@@ -7,7 +7,7 @@ import networkx as nx
 G = nx.DiGraph()
 
 # Add conclusions as nodes
-conclusions = ["N1", "N2"]
+conclusions = ["N1 applies to Sam's Case", "N2 applies to Sam's Case"]
 G.add_nodes_from(conclusions)
 
 # Add reasons as nodes
@@ -16,10 +16,10 @@ G.add_nodes_from(reasons)
 
 # Add relationships as edges with attributes for 'con' or 'pro'
 relationships = [
-    ("F1: N1 is applicable to Sam's case","N1", {'type': 'pro'}),
-    ("F1: N1 is applicable to Sam's case","N2", {'type': 'con'}),
-    ("F2: N2 is applicable to Sam's case","N1", {'type': 'con'}),
-    ("F2: N2 is applicable to Sam's case","N2", {'type': 'pro'}),
+    ("F1: N1 is applicable to Sam's case","N1 applies to Sam's Case", {'type': 'pro'}),
+    ("F1: N1 is applicable to Sam's case","N2 applies to Sam's Case", {'type': 'con'}),
+    ("F2: N2 is applicable to Sam's case","N1 applies to Sam's Case", {'type': 'con'}),
+    ("F2: N2 is applicable to Sam's case","N2 applies to Sam's Case", {'type': 'pro'}),
     ]
 
 G.add_edges_from(relationships)
