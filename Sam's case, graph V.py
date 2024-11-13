@@ -123,8 +123,10 @@ for edge in net.edges:
 # 3. Disable physics for a cleaner layout (optional)
 net.toggle_physics(False)
 
-
-# ... (net.show() and files.download() as before) ...
+# Add in/out labels to conclusion nodes
+for node in net.nodes:
+    if node['id'] in conclusions:  # Check if the node is a conclusion node
+        node['label'] += " (" + final_status[node['id']] + ")"  # Append status to label
 
 # Show the network
 net.show("network_with_physics.html")
