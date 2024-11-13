@@ -116,6 +116,14 @@ for edge in net.edges:
 net.toggle_physics(False)
 
 
+
+# Add in/out labels to conclusion nodes
+for node in net.nodes:
+    if node['id'] in conclusions:  # Check if the node is a conclusion node
+        node['label'] += " (" + final_status[node['id']] + ")"  # Append status to label
+
+
+
 # ... (net.show() and files.download() as before) ...
 
 # Show the network
