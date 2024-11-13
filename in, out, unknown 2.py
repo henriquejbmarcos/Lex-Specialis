@@ -11,7 +11,7 @@ conclusions = ["N1 applies to Sam's case", "N2 applies to Sam's case"]
 G.add_nodes_from(conclusions)
 
 # Add reasons as nodes
-reasons = ["F1: N1 is applicable to Sam's case", "F2: N2 is applicable to Sam's case", "F3: N2 is more specific than N1","F4: applying N2 to Sam's case violates the aims of IHL"]
+reasons = ["F1: N1 is applicable to Sam's case", "F2: N2 is applicable to Sam's case", "F3: N2 is more specific than N1"]
 G.add_nodes_from(reasons)
 
 # Add relationships as edges with attributes for 'con' or 'pro'
@@ -22,22 +22,19 @@ relationships = [
     ("F2: N2 is applicable to Sam's case","N2 applies to Sam's case", {'type': 'pro'}),
     ("F3: N2 is more specific than N1","F2: N2 is applicable to Sam's case",{'type': 'pro'}),
     ("F3: N2 is more specific than N1","F1: N1 is applicable to Sam's case",{'type': 'con'}),
-    ("F4: applying N2 to Sam's case violates the aims of IHL","F2: N2 is applicable to Sam's case",{'type': 'con'}),
-    ("F4: applying N2 to Sam's case violates the aims of IHL","F1: N1 is applicable to Sam's case",{'type': 'pro'}),
-    ]
+]
 
 G.add_edges_from(relationships)
-def evaluate_norms(graph):
-    # Start with all nodes as unknown, and update based on no cons or all cons
-    status = {node: 'unknown' for node in graph}
+# ... (Your existing import statements and graph creation code) ...
 
-    # Nodes with no incoming edges should be set to 'in'
+def evaluate_norms(graph):
+    # Start with all nodes as out, and update based on no cons
+    status = {node: 'out' for node in graph}
+
+    # Nodes with no incoming con edges should be set to 'in'
     for node in graph:
-        if not graph.predecessors(node):  # No incoming edges
+        if not any(graph[pred][node]['type'] == 'con' for pred in graph.predecessors(node)):
             status[node] = 'in'
-        # Nodes with only con edges and no pro should be 'out'
-        elif all(graph[pred][node]['type'] == 'con' for pred in graph.predecessors(node)) and not any(graph[pred][node]['type'] == 'pro' for pred in graph.predecessors(node)):
-            status[node] = 'out'
 
     changes = True
     while changes:
@@ -45,24 +42,32 @@ def evaluate_norms(graph):
         new_status = status.copy()
         for node in graph:
             active = status[node] == 'in'
-            for neighbor in graph[node]:
-                edge_data = graph[node][neighbor]
-
+            for neighbour in graph[node]:
+                edge_data = graph[node][neighbour]
                 if edge_data['type'] == 'con' and active:
-                    if new_status[neighbor] != 'out':
-                        new_status[neighbor] = 'out'
+                    if new_status[neighbour] != 'out':
+                        new_status[neighbour] = 'out'
                         changes = True
                 elif edge_data['type'] == 'pro' and active:
-                    if new_status[neighbor] != 'in':
-                        if new_status[neighbor] == 'out':  # Conflict, set to 'unknown'
-                            new_status[neighbor] = 'unknown'
-                        else:
-                            new_status[neighbor] = 'in'
+                    if new_status[neighbour] != 'in':
+                        new_status[neighbour] = 'in'  # If pro and active, set to 'in'
                         changes = True
 
         status = new_status
 
-    return status
+    # After stabilization, check for conflicts and set to 'unknown'
+    for node in graph:
+        has_pro = any(graph[pred][node]['type'] == 'pro' for pred in graph.predecessors(node) if status[pred] == 'in')
+        has_con = any(graph[pred][node]['type'] == 'con' for pred in graph.predecessors(node) if status[pred] == 'in')
+
+        if status[node] == 'out' and has_pro:  # Conflict: 'out' but has supporting 'pro'
+            status[node] = 'unknown'
+        elif status[node] == 'in' and has_con:  # Conflict: 'in' but has contradicting 'con'
+            status[node] = 'unknown'
+
+    return status  # Return the final status dictionary
+
+# ... (The rest of your code for PyVis visualization, etc.) ...
 
 # Evaluate and print the final status of norms
 final_status = evaluate_norms(G)
@@ -127,9 +132,9 @@ net.toggle_physics(False)
 
 # Add status labels to nodes
 for node in net.nodes:
-    node_id = node['id'] 
+    node_id = node['id']
     if node_id in conclusions:  # Check if the node is a conclusion
-        status = final_status.get(node_id, 'unknown')  
+        status = final_status.get(node_id, 'unknown')  # Get actual status
         node['label'] += f" ({status})"  # Append status to label
 
 
