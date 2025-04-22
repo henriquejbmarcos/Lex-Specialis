@@ -25,10 +25,7 @@ G.add_edges_from(relationships)
 
 # Function to evaluate norms
 def evaluate_norms(graph):
-    # Start with all nodes as out, and update based on no cons
     status = {node: 'out' for node in graph}
-
-    # Nodes with no incoming con edges should be set to 'in'
     for node in graph:
         if not any(graph[pred][node]['type'] == 'con' for pred in graph.predecessors(node)):
             status[node] = 'in'
@@ -58,8 +55,6 @@ def evaluate_norms(graph):
 final_status = evaluate_norms(G)
 print(final_status)
 
-# MODIFICATIONS FROM HERE ONWARD
-
 # Add edges with pro and con labels
 for relationship in relationships:
     G.add_edge(relationship[0], relationship[1], label=relationship[2]['type'])
@@ -84,11 +79,7 @@ for edge in net.edges:
 # Enable controls for zoom, and interaction buttons
 net.show_buttons(filter_=['physics'])
 
-# ... (Your existing code for creating the network) ...
-
-# Before net.show():
-
-# 1. Set node shape to 'text' and font color to black with white background
+# Set node shape to 'text' and font color to black with white background
 for node in net.nodes:
     node['shape'] = 'text'  # Display nodes as text
     node['color'] = {
@@ -105,27 +96,21 @@ for node in net.nodes:
         'background': 'white' # Add white background behind text
     }
 
-# 2. Set edge color to black and keep arrows
+# Set edge color to black and keep arrows
 for edge in net.edges:
     edge['color'] = 'black'    # Set edge color to black
     # Keep the default arrow style or customize if needed:
     # edge['arrows'] = 'to'    # Example: Only arrow on the 'to' side
 
 
-# 3. Disable physics for a cleaner layout (optional)
+# Disable physics for a cleaner layout 
 net.toggle_physics(False)
-
-
 
 # Add in/out labels to conclusion nodes
 for node in net.nodes:
     if node['id'] in conclusions:  # Check if the node is a conclusion node
         node['label'] += " (" + final_status[node['id']] + ")"  # Append status to label
-
-
-
-# ... (net.show() and files.download() as before) ...
-
+        
 # Show the network
 net.show("network_with_physics.html")
 
