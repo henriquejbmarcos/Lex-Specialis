@@ -96,6 +96,5 @@ net.toggle_physics(False)
 
 net.show("network_with_physics.html")
 
-# Download the HTML file in Google Colab to view in browser
 from google.colab import files
 files.download("network_with_physics.html")
